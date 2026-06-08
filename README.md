@@ -1,70 +1,43 @@
-# This branch is the plugin for development version of KiCad
+# ViaStitching for KiCad 10
 
+A pure-python Via Stitching action plugin for KiCad's PCB editor (pcbnew).
 
-Please select the right branch according your KiCad version:
- - master for development version of KiCad
- - master for KiCad V6 (until python API changes in dev version of KiCad)
- - v5.1 for KiCad version 5.1.*
- - v6.0 for KiCad version 6.0.*
- - v7.0 for KiCad version 7.0.*
- - v8.0 for KiCad version 8.0.*
- - v9.0 for KiCad version 9.0.*
+This is a trimmed fork of [js-reynaud/kicad-action-scripts](https://github.com/jsreynaud/kicad-action-scripts):
+everything except the Via Stitching plugin has been removed, and the version
+detection has been fixed so it runs on **KiCad 10**.
 
-# Know issues
+> KiCad 10 still ships the legacy SWIG `pcbnew.ActionPlugin` API this plugin uses.
+> That API is deprecated and is scheduled for removal in KiCad 11, at which point
+> a rewrite to the IPC API (`kicad-python`) will be required.
 
+## Install
 
-# Old issues
+Copy (or symlink) this whole directory into your KiCad plugins folder, then restart
+pcbnew or use *Tools → External Plugins → Refresh Plugins*.
 
- - Unable to delete VIA automaticaly (since The old method - used in 5.1 - don't
-   work anymore) => Please manually remove the group created that own
-   all vias
- - Via are invisible after plugin run. Need to save and reopen file to
-   see them => Fixed by KiCad upstream
+The exact path is shown in pcbnew under *Tools → External Plugins → Open Plugin Directory*.
+Typical locations:
+ - Windows: `%USERPROFILE%\Documents\KiCad\10.0\3rdparty\plugins\`
+ - Linux: `~/.local/share/kicad/10.0/scripting/plugins/` (or `~/.kicad_plugins/`)
+ - macOS: `~/Documents/KiCad/10.0/scripting/plugins/`
 
+## Usage
 
-
-# Some KiCad plugins in Python
-
-Thoses plugins must be copied inside KiCad's python plugins
-directory (~/.kicad_plugins or /usr/share/kicad/scripting/plugins/ for
-Linux).
-Most of them use python plugin (Action plugins) in KiCad. This feature
-is enabled in daily builds of KiCad.
-See https://forum.kicad.info/t/howto-register-a-python-plugin-inside-pcbnew-tools-menu/5540
-
-
-## ViaStitching
-
-A pure python via stitching.
-
-After select "Via Stitching" in Tools menu, choose your options in the
-interface.
+Select **Via Stitching Generator** in the Tools menu (or its toolbar button),
+choose your options in the dialog and run.
 
 ![The interface](images/via1.png)
 
-Then the result should be:
+Result:
 
 ![The result](images/via2.png)
 
-## CircularZone
+## Known issues
 
-A pure python script to create circular zone.
+ - Vias cannot be deleted automatically. The plugin creates a group named
+   `ViaStitching <net>` that owns all generated vias — select one via to select
+   the group, then press Delete.
 
-Select a component. This component will be used as center of the
-circular zone. If no component is selected, the origin (0,0) will be
-used as center.
+## License
 
-After select "Create a circular zone" in the Tools menu, choose the
-radius and the type of zone (normal or keep out).
-
-![The interface](images/circular1.png)
-
-A circular zone will be created. Select it to change properties:
-
-![Select zone](images/circular2.png)
-
-![Open properties](images/circular3.png)
-
-Refill the area (B hotkey) then the circular zone is ready.
-
-![Final result](images/circular4.png)
+GPL v2 or later — see [LICENSE.md](LICENSE.md).

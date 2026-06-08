@@ -38,6 +38,21 @@ def wxPrint(msg):
     wx.LogMessage(msg)
 
 
+def KiCadMajorVersion():
+    """
+    Return the KiCad major version as an int (e.g. 10 for "10.0.0").
+
+    NOTE: Do NOT compare the raw Version() string. Version() returns e.g.
+    "10.0.0", and a lexicographic compare such as Version() < "7" evaluates
+    '1' < '7' -> True, so KiCad 10 was wrongly treated as < 7 and took the
+    legacy KiCad 5/6 code paths. Parse the integer major instead.
+    """
+    try:
+        return int(Version().split(".")[0])
+    except Exception:
+        return 0
+
+
 #
 if sys.version[0] == "2":  # maui
     None
@@ -297,7 +312,7 @@ STEP         = '-'
         for i in range(self.pcb.GetAreaCount()):
             area = self.pcb.GetArea(i)
             # No more making a real refill since it's crashing KiCad
-            if Version() < "7":
+            if KiCadMajorVersion() < 7:
                 None
             else:
                 area.SetNeedRefill(True)
@@ -329,7 +344,7 @@ STEP         = '-'
                         point_to_test = VECTOR2I(int(via.PosX + dx), int(via.PosY + dy))
 
                         hit_test_area = False
-                        if Version() < "7":
+                        if KiCadMajorVersion() < 7:
                             # below 7.0.0
                             for layer_id in area.GetLayerSet().CuStack():
                                 hit_test_area = hit_test_area or area.HitTestFilledArea(layer_id, point_to_test)  # Collides with a filled area
@@ -478,7 +493,7 @@ STEP         = '-'
             # For KiCad >= 7, zone.Outline() may return an empty SHAPE_POLY_SET for inner-layer
             # zones. We therefore try to build the polygon from points directly.
             zone_poly = SHAPE_POLY_SET()
-            if Version() < "7":
+            if KiCadMajorVersion() < 7:
                 for layer_id in zone.GetLayerSet().CuStack():
                     z = zone.RawPolysList(layer_id)
                     if z.OutlineCount() > 0:
@@ -664,7 +679,12 @@ STEP         = '-'
 
         # Get the board outline and size with
         board_edge = SHAPE_POLY_SET()
-        self.pcb.GetBoardPolygonOutlines(board_edge)
+        try:
+            # KiCad <= 9 signature: GetBoardPolygonOutlines(aOutlines)
+            self.pcb.GetBoardPolygonOutlines(board_edge)
+        except TypeError:
+            # KiCad 10+ added a required bool: aInferOutlineIfNecessary
+            self.pcb.GetBoardPolygonOutlines(board_edge, True)
         b_clearance = max(self.pcb.GetDesignSettings().m_CopperEdgeClearance, self.clearance) + self.size
         board_edge.Deflate(int(b_clearance), CORNER_STRATEGY_ROUND_ALL_CORNERS, FromMM(0.01))
 
@@ -703,7 +723,7 @@ STEP         = '-'
                             offset = 0  # Use an exact zone match
                             point_to_test = VECTOR2I(int(current_x), int(current_y))
                             hit_test_area = False
-                            if Version() < "7":
+                            if KiCadMajorVersion() < 7:
                                 # below 7.0.0
                                 hit_test_area = area.HitTestFilledArea(area.GetLayer(), VECTOR2I(point_to_test), int(offset))  # Collides with a filled area
                             else:

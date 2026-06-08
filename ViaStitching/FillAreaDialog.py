@@ -7,8 +7,13 @@
 ## PLEASE DO *NOT* EDIT THIS FILE!
 ###########################################################################
 
+import os
 import wx
 import wx.xrc
+
+# Directory holding this file (and the bundled bitmaps). Used so images load
+# regardless of the current working directory KiCad launches the plugin from.
+_HERE = os.path.dirname(os.path.abspath(__file__))
 
 ###########################################################################
 ## Class FillAreaDialog
@@ -74,7 +79,7 @@ class FillAreaDialog ( wx.Dialog ):
 
 		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
 
-		self.m_bitmapStitching = wx.StaticBitmap( self, wx.ID_ANY, wx.Bitmap( u"stitching-vias-help.png", wx.BITMAP_TYPE_ANY ), wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_bitmapStitching = wx.StaticBitmap( self, wx.ID_ANY, wx.Bitmap( os.path.join( _HERE, u"stitching-vias-help.png" ), wx.BITMAP_TYPE_ANY ), wx.DefaultPosition, wx.DefaultSize, 0 )
 		fgSizer1.Add( self.m_bitmapStitching, 0, wx.EXPAND, 5 )
 
 		self.m_staticText6 = wx.StaticText( self, wx.ID_ANY, u"Net name", wx.DefaultPosition, wx.DefaultSize, 0 )
